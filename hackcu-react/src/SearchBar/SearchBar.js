@@ -76,7 +76,11 @@ const SearchBar = (props) => {
 
             {/* SEARCH BAR */}
             <Col xs={{ size: 'auto' }}>
-                <Form className='searchBar' onSubmit={props.getBillsFromQuery.bind(this)}>
+                <Form 
+                    className='searchBar' 
+                    onSubmit={ props.page !== "legislators" ?
+                        props.getBillsFromQuery.bind(this) : 
+                        props.getRepsFromQuery.bind(this)}>
                     <InputGroup>
                         <Input placeholder="Search Bills" onChange={props.handleInput.bind(this)} />
                     </InputGroup>

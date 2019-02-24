@@ -8,8 +8,7 @@ import RepContainer from './Pages/RepContainer/RepContainer';
 import SearchBar from './SearchBar/SearchBar';
 import { Route, Switch } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
-const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";
-// const sendGridKey = "c91d0fa0a6msh1417965add04d7cp1caaa2jsn509bcdccbd47";              
+const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";           
 const port = process.env.REACT_APP_BACKEND
 
 // =================================
@@ -45,6 +44,8 @@ class App extends Component {
     }
   }
 
+
+
   // ================================================================================================================
   //                                            TOGGLE DROPDOWN
   // ================================================================================================================
@@ -59,7 +60,7 @@ class App extends Component {
   // ================================================================================================================
   getTrendingBills = async () => {
     try {
-        const topBills = await fetch(`${process.env.REACT_APP_BACKEND}bills/trending`, {
+        const topBills = await fetch(`${port}bills/trending`, {
             method: 'GET',
             credentials: 'include',
             headers: {
@@ -165,7 +166,7 @@ class App extends Component {
       // ================================================
       // CREATE IN MONGO IF DOESNT EXIST
       // ================================================
-      const createBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/`, {
+      const createBill = await fetch(`${port}bills/`, {
         method: 'POST',
         body: JSON.stringify({
           title: billToTrack.title,
@@ -189,7 +190,7 @@ class App extends Component {
       // ================================================
       // MONGO: ADD TO USER'S TRACKED BILLS (IF POSSIBLE)
       // ================================================
-      const isUserTracking = await fetch(`${process.env.REACT_APP_BACKEND}users/${this.state._id}/track/${billToTrack.bill_id}`, {
+      const isUserTracking = await fetch(`${port}users/${this.state._id}/track/${billToTrack.bill_id}`, {
         method: 'PUT',
         body: JSON.stringify({
           bill: billToTrack,
@@ -249,7 +250,7 @@ class App extends Component {
           console.log('you sent an email')
         }
 
-        const updateBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/track/${billToTrack.bill_id}`, {
+        const updateBill = await fetch(`${port}bills/track/${billToTrack.bill_id}`, {
           method: 'PUT',
           body: JSON.stringify({
             increment: 1,
@@ -294,7 +295,7 @@ class App extends Component {
       // ==================================================================
       // DECREMENT IN MONGO DATABASE
       // ==================================================================
-      const updateBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/untrack/${billId}`, {
+      const updateBill = await fetch(`${port}bills/untrack/${billId}`, {
         method: 'PUT',
         body: JSON.stringify({
           increment: -1,
@@ -312,7 +313,7 @@ class App extends Component {
       // ==================================================================
       // REMOVE FROM USER'S TRACKED BILLS
       // ==================================================================
-      const userUntrackBill = await fetch(`${process.env.REACT_APP_BACKEND}users/${this.state._id}/untrack/${billId}`, {
+      const userUntrackBill = await fetch(`${port}users/${this.state._id}/untrack/${billId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -371,7 +372,7 @@ class App extends Component {
   handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND}auth/register`, {
+      const loginResponse = await fetch(`${port}auth/register`, {
         method: 'POST',
         body: JSON.stringify({
           username: this.state.username,
@@ -409,7 +410,7 @@ class App extends Component {
   handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND}users/login`, {
+      const loginResponse = await fetch(`${port}users/login`, {
         method: 'POST',
         body: JSON.stringify({
           username: this.state.username,
@@ -508,6 +509,56 @@ class App extends Component {
     }
   }
 
+  // ====================================================================================================================
+  //                                    THIS SHOULD QUERY THE API WITH USER INPUT
+  // ====================================================================================================================
+  getRepsFromQuery = async (e) => {
+    e.preventDefault();
+    // ========================
+    // HERE WE MAKE AN API CALL
+    // ========================
+    // API PARAMS
+    // ==========
+    const state = this.state.userState.toLowerCase();
+    try {
+      const response = await fetch(`https://civicfeed-civicfeed-legislation-v1.p.rapidapi.com/legislation/legislators/?state=${state}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-RapidAPI-Key': civicFeedKey
+        },
+      });
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+      const billsParsed = await response.json();
+
+      // ==============================
+      // NOW UPDATE THE STATE WITH DATA
+      // ==============================
+      let uncleanArray = [...billsParsed];
+      let cleanArray = [];
+      for (let i = 0; i < 10; i++) {
+        let repObj = {
+          firstName: uncleanArray[i].first_name,
+          lastName: uncleanArray[i].last_name,
+          state: uncleanArray[i].state,
+          party: uncleanArray[i].party,
+          image: ""
+        };
+        cleanArray.push(repObj)
+      }
+
+      this.setState({
+        reps: cleanArray
+      });
+
+    } catch (err) {
+      console.log(err);
+      return err
+    }
+  }
+
   render() {
     return (
       <div id="container">
@@ -521,6 +572,7 @@ class App extends Component {
             <Col xs={{ size: 'auto' }}>
               <SearchBar
                 getBillsFromQuery={this.getBillsFromQuery}
+                getRepsFromQuery={this.getRepsFromQuery}
                 onRadioBtnClick={this.onRadioBtnClick}
                 selected={this.state.queryBtn}
                 handleInput={this.handleInput}
@@ -528,6 +580,7 @@ class App extends Component {
                 toggle={this.toggle}
                 userState={this.state.userState}
                 changeState={this.changeState}
+                page={this.state.activePage}
               />
             </Col>
           </Row> <br />
