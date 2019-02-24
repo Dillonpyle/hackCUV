@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import TrackingContainer from './Pages/TrackingContainer/TrackingContainer';
+import TrendingContainer from './Pages/TrendingContainer/TrendingContainer';
 import Navigation from './Navigation/Navigation';
 import BillContainer from './Pages/BillContainer/BillContainer';
 import RepContainer from './Pages/RepContainer/RepContainer';
@@ -38,6 +39,7 @@ class App extends Component {
       queryBtn: 0,
       bills: [],
       trackedBills: [],
+      trendingBills: [],
       trackedReps: [],
       reps: []
     }
@@ -49,6 +51,44 @@ class App extends Component {
   toggle = () => {
     this.setState({
       dropdownOpen: !this.state.dropdownOpen
+    });
+  }
+
+  // ================================================================================================================
+  //                                            TOGGLE DROPDOWN
+  // ================================================================================================================
+  getTrendingBills = async () => {
+    try {
+        const topBills = await fetch(`${process.env.REACT_APP_BACKEND}bills/trending`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+            'Content-Type': 'application/json'
+            }
+        });
+        if(!topBills.ok){
+            throw Error(topBills.statusText)
+        }
+        const parsedTopBills = await topBills.json();
+        // ===================================
+        // UPDATE STATE WITH TRENDING BILLS
+        // ===================================
+        this.updateTrending(parsedTopBills.data);
+        console.log(`Trending bills response from Express API:${parsedTopBills.data}`)
+    } catch(err){
+        console.log(err)
+    }
+  }
+
+  // ================================================================================================================
+  //                                     UPDATE THE TRENDING BILLS ARRAY
+  // ================================================================================================================
+  updateTrending = (data) => {
+    console.log(`We are about to update Trending Bills with: ${data}`);
+    this.setState({
+      trendingBills: data
+    }, function() {
+      console.log(`Our new state is: ${this.state.trendingBills}`)
     });
   }
 
@@ -89,8 +129,12 @@ class App extends Component {
   //                                CHANGE ACTIVE PAGE WHEN USER NAVIGATES
   // ================================================================================================================ 
   updateNav = (page) => {
-    this.setState({
+    this.setState({ 
       activePage: page
+    }, function() {
+      if (page === "trending"){
+        this.getTrendingBills();
+      }
     });
   }
 
@@ -500,6 +544,16 @@ class App extends Component {
                   handleLogin={this.handleLogin}
                   handleChange={this.handleChange}
                   handleRegister={this.handleRegister} />)}
+              />
+
+              <Route exact path="/trending" render={(routeProps) => 
+                (<TrendingContainer {...routeProps} 
+                  untrackBill={this.untrackBill} 
+                  addBillToTracking={this.addBillToTracking} 
+                  bills={this.state.trendingBills} 
+                  updateTrending={this.updateTrending} 
+                  trackedBills={this.state.trackedBills}
+                  logged={this.state.logged} />)}
               />
 
               <Route exact path="/bills" render={(routeProps) =>

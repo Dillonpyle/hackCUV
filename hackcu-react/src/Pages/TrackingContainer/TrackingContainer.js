@@ -15,6 +15,7 @@ const TrackingContainer = (props) => {
             </Card>
         )
     })
+
     const trackedReps = props.trackedReps.map ((rep,i) => {
         return (
             <Card body>
@@ -35,10 +36,10 @@ const TrackingContainer = (props) => {
             ) : (
                 <Col>
                     <hr/>
-                    <h1>Bills</h1>
+                    <h1 className="alignCenter">Bills</h1>
                     {trackedBills}
                     <hr/>
-                    <h1>Legislators</h1>
+                    <h1 className="alignCenter">Legislators</h1>
                     {trackedReps}
                     <hr/>
                 </Col>
