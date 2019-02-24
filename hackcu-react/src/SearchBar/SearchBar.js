@@ -14,7 +14,6 @@ const SearchBar = (props) => {
                             {props.userState}
                         </DropdownToggle>
                         <DropdownMenu onClick={props.changeState.bind(this)}>
-                            <DropdownItem></DropdownItem>
                             <DropdownItem name="ALL" active={props.userState === "ALL"}>ALL</DropdownItem>
                             <DropdownItem name="AL" active={props.userState === "AL"}>AL</DropdownItem>
                             <DropdownItem name="AK" active={props.userState === "AK"}>AK</DropdownItem>
