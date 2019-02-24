@@ -1,15 +1,15 @@
-import React, { Component } from 'react';                                 
-import './App.css';                                                       
-import TrackingContainer from './Pages/TrackingContainer/TrackingContainer';    
-import Navigation from './Navigation/Navigation';                             
-import BillContainer from './Pages/BillContainer/BillContainer';             
-import RepContainer from './Pages/RepContainer/RepContainer';                
-import SearchBar from './SearchBar/SearchBar';                            
-import { Route, Switch } from 'react-router-dom';                         
-import { Container, Row, Col } from 'reactstrap';                                                                                                      
+import React, { Component } from 'react';
+import './App.css';
+import TrackingContainer from './Pages/TrackingContainer/TrackingContainer';
+import Navigation from './Navigation/Navigation';
+import BillContainer from './Pages/BillContainer/BillContainer';
+import RepContainer from './Pages/RepContainer/RepContainer';
+import SearchBar from './SearchBar/SearchBar';
+import { Route, Switch } from 'react-router-dom';
+import { Container, Row, Col } from 'reactstrap';
 const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";
 // const sendGridKey = "c91d0fa0a6msh1417965add04d7cp1caaa2jsn509bcdccbd47";              
-const port = process.env.REACT_APP_BACKEND                                
+const port = process.env.REACT_APP_BACKEND
 
 // =================================
 // ERROR 404
@@ -23,7 +23,7 @@ const My404 = () => {
 }
 
 class App extends Component {
-  constructor(){
+  constructor() {
     super();
 
     this.state = {
@@ -40,7 +40,7 @@ class App extends Component {
       trackedBills: [],
       trackedReps: [],
       reps: []
-      }
+    }
   }
 
   // ================================================================================================================
@@ -58,7 +58,7 @@ class App extends Component {
   changeState = (e) => {
     this.setState({
       userState: e.target.name
-    }, function(){
+    }, function () {
       console.log(`USER'S STATE IS NOW: ${this.state.userState}`)
     });
   }
@@ -69,7 +69,7 @@ class App extends Component {
   handleInput = (e) => {
     this.setState({
       query: e.target.value
-    }, function(){
+    }, function () {
       console.log(`SEARCHBAR SHOWS: ${this.state.query}`)
     });
   }
@@ -78,9 +78,9 @@ class App extends Component {
   //                               CHANGE QUERY BUTTON STATE WHEN USER CLICKS
   // ================================================================================================================ 
   onRadioBtnClick = (btn) => {
-    this.setState({ 
+    this.setState({
       queryBtn: btn
-    }, function() {
+    }, function () {
       console.log(`Radio Button should now be: ${this.state.queryBtn}`);
     });
   }
@@ -89,7 +89,7 @@ class App extends Component {
   //                                CHANGE ACTIVE PAGE WHEN USER NAVIGATES
   // ================================================================================================================ 
   updateNav = (page) => {
-    this.setState({ 
+    this.setState({
       activePage: page
     });
   }
@@ -107,7 +107,7 @@ class App extends Component {
       failedEntry: false,
       _id: userId,
       trackedBills: tracked
-    }, function() {
+    }, function () {
       console.log(`LOGGED IN. ID: ${this.state._id}, BILLS: ${this.state.trackedBills}`);
     });
   }
@@ -124,23 +124,23 @@ class App extends Component {
       const createBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/`, {
         method: 'POST',
         body: JSON.stringify({
-          title: billToTrack.title,   
+          title: billToTrack.title,
           state: billToTrack.state,
-          bill_id: billToTrack.bill_id,   
+          bill_id: billToTrack.bill_id,
           summary: billToTrack.summary,
           proposed: billToTrack.created_at,
           lastAction: billToTrack.updated_at,
         }),
         credentials: 'include',
         headers: {
-        'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
         }
-        });
-        if(!createBill.ok){
-            throw Error(createBill.statusText)
-        }
-        const parsedCreateBill = await createBill.json();
-        console.log(`TRIED TO CREATE BILL, NODE SENT:${JSON.stringify(parsedCreateBill)}`)
+      });
+      if (!createBill.ok) {
+        throw Error(createBill.statusText)
+      }
+      const parsedCreateBill = await createBill.json();
+      console.log(`TRIED TO CREATE BILL, NODE SENT:${JSON.stringify(parsedCreateBill)}`)
 
       // ================================================
       // MONGO: ADD TO USER'S TRACKED BILLS (IF POSSIBLE)
@@ -152,9 +152,10 @@ class App extends Component {
         }),
         credentials: 'include',
         headers: {
-        'Content-Type': 'application/json'
-      }});
-      if(!isUserTracking.ok){
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!isUserTracking.ok) {
         throw Error(isUserTracking.statusText)
       }
       const parsedIsUserTracking = await isUserTracking.json();
@@ -166,34 +167,34 @@ class App extends Component {
         const cors_api_host = 'cors-anywhere.herokuapp.com';
         const cors_api_url = 'https://' + cors_api_host + '/';
         const getEmail = await fetch(`${cors_api_url}https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send`, {
-        method: 'POST',
-        body: JSON.stringify({
-          personalizations: [
-            {
-              to: [
-                {
-                  email: "dillonpyle1991@gmail.com"
-                }
-              ],
-              subject: "New Tracked Bill"
-            }
-          ],
-          from: {
-            email: "from_address@example.com"
+          method: 'POST',
+          body: JSON.stringify({
+            personalizations: [
+              {
+                to: [
+                  {
+                    email: this.state.email
+                  }
+                ],
+                subject: `Now tracked ${billToTrack.bill_id} ${parsedCreateBill.data.title}`
+              }
+            ],
+            from: {
+              email: "from_address@example.com"
+            },
+            content: [
+              {
+                type: "text/plain",
+                value: JSON.stringify(parsedCreateBill.data.summary)
+              }
+            ]
+          }),
+          //credentials: 'include',
+          headers: {
+            'X-RapidAPI-Key': civicFeedKey,
+            'Content-Type': 'application/json'
           },
-          content: [
-            {
-              type: "text/plain",
-              value: `you tracked a bill`
-            }
-          ]
-        }),
-        //credentials: 'include',
-        headers: {
-          'X-RapidAPI-Key': civicFeedKey,
-          'Content-Type': 'application/json'
-        },
-        
+
         });
 
         if (!getEmail.ok) {
@@ -205,17 +206,17 @@ class App extends Component {
         }
 
         const updateBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/track/${billToTrack.bill_id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          increment: 1,
-        }),
-        credentials: 'include',
-        headers: {
-        'Content-Type': 'application/json'
-        }
+          method: 'PUT',
+          body: JSON.stringify({
+            increment: 1,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
-        if(!updateBill.ok){
-            throw Error(updateBill.statusText)
+        if (!updateBill.ok) {
+          throw Error(updateBill.statusText)
         }
         const parsedUpdateBill = await updateBill.json();
         console.log(`INCREMENTED BILL ID ${JSON.stringify(parsedUpdateBill.data.bill_id)}`)
@@ -223,20 +224,20 @@ class App extends Component {
         // ADD TO TRACKEDBILLS IN REACT (BASED ON DB REPLY)
         // ================================================
         let updatedArray = [...this.state.bills];
-        for(let i = 0; i < updatedArray.length; i++) {
-          if(updatedArray[i].bill_id == billToTrack.bill_id) {
-            updatedArray[i].trackingCount ++
+        for (let i = 0; i < updatedArray.length; i++) {
+          if (updatedArray[i].bill_id == billToTrack.bill_id) {
+            updatedArray[i].trackingCount++
           }
         }
 
-        this.setState({ 
+        this.setState({
           trackedBills: [...this.state.trackedBills, parsedUpdateBill.data],
           bills: updatedArray
         });
       } else {
         console.log(`ALREADY TRACKING BILL ${billToTrack.bill_id}`)
       }
-    } catch(err){
+    } catch (err) {
       console.log(err)
     }
   }
@@ -246,155 +247,155 @@ class App extends Component {
   // ================================================================================================================
   untrackBill = async (billId) => {
     try {
-  // ==================================================================
-  // DECREMENT IN MONGO DATABASE
-  // ==================================================================
+      // ==================================================================
+      // DECREMENT IN MONGO DATABASE
+      // ==================================================================
       const updateBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/untrack/${billId}`, {
         method: 'PUT',
         body: JSON.stringify({
-            increment: -1,
+          increment: -1,
         }),
         credentials: 'include',
         headers: {
-        'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
         }
       });
-      if(!updateBill.ok){
+      if (!updateBill.ok) {
         throw Error(updateBill.statusText)
       }
       const parsedUpdateBill = await updateBill.json();
       console.log(`Updated bill response from Express API:${parsedUpdateBill}`)
-  // ==================================================================
-  // REMOVE FROM USER'S TRACKED BILLS
-  // ==================================================================
+      // ==================================================================
+      // REMOVE FROM USER'S TRACKED BILLS
+      // ==================================================================
       const userUntrackBill = await fetch(`${process.env.REACT_APP_BACKEND}users/${this.state._id}/untrack/${billId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
-        'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
         }
       });
-      if(!userUntrackBill.ok){
+      if (!userUntrackBill.ok) {
         throw Error(userUntrackBill.statusText)
       }
       const parsedUntrackBill = await userUntrackBill.json();
       console.log(`UNTRACKED BILL ${JSON.stringify(parsedUntrackBill.data.bill_id)}`)
-  // ==================================================================
-  // REMOVE FROM TRACKEDBILLS IN REACT, IF SUCCESSFUL MONGO DELETION
-  // ==================================================================
+      // ==================================================================
+      // REMOVE FROM TRACKEDBILLS IN REACT, IF SUCCESSFUL MONGO DELETION
+      // ==================================================================
       if (parsedUntrackBill.status == 200) {
         let billIds = [];
-        for (let i=0; i<this.state.trackedBills; i++){
+        for (let i = 0; i < this.state.trackedBills; i++) {
           billIds.push(this.state.trackedBills[i].bill_id)
         }
         console.log(`TRACKED BILLS: ${JSON.stringify(billIds)}`)
 
         let arr = [];
         this.state.trackedBills.forEach((bill) => {
-          if (bill.bill_id !== billId){
+          if (bill.bill_id !== billId) {
             arr.push(bill);
           }
         })
 
         let updatedArray = [...this.state.bills];
-        for(let i = 0; i < updatedArray.length; i++) {
-          if(updatedArray[i].bill_id == billId && updatedArray[i].trackingCount) {
-            updatedArray[i].trackingCount --
+        for (let i = 0; i < updatedArray.length; i++) {
+          if (updatedArray[i].bill_id == billId && updatedArray[i].trackingCount) {
+            updatedArray[i].trackingCount--
           }
         }
 
         this.setState({
           trackedBills: arr,
           bills: updatedArray
-        }, function() {
+        }, function () {
           let billIds = [];
-          for (let i=0; i<this.state.trackedBills; i++){
+          for (let i = 0; i < this.state.trackedBills; i++) {
             billIds.push(this.state.trackedBills[i].bill_id)
           }
           console.log(`UNTRACKED BILL ${billId} TRACKED BILLS: ${billIds}.`);
           //this.getTrendingBills();
-      });
+        });
       }
     } catch (err) {
       console.log(err);
     }
   }
-  
+
   // ================================================================================================================
   //                                           HANDLE REGISTRATION AND LOGIN
   // ================================================================================================================
   handleRegister = async (e) => {
     e.preventDefault();
     try {
-        const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND}auth/register`, {
-            method: 'POST',
-            body: JSON.stringify({
-                username: this.state.username,
-                password: this.state.password,
-                email: this.state.email,
-                trackedBills: [],
-                trackedReps: []
-            }),
-            credentials: 'include',
-            headers: {
-            'Content-Type': 'application/json'
-            }
+      const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND}auth/register`, {
+        method: 'POST',
+        body: JSON.stringify({
+          username: this.state.username,
+          password: this.state.password,
+          email: this.state.email,
+          trackedBills: [],
+          trackedReps: []
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!loginResponse.ok) {
+        throw Error(loginResponse.statusText)
+      }
+      const parsedResponse = await loginResponse.json();
+      console.log('UNFILTERED RESPONSE FROM EXPRESS', loginResponse);
+      console.log('JSON RESPONSE FROM EXPRESS', parsedResponse);
+      const jsonString = parsedResponse.data;
+      const id = JSON.parse(jsonString).userId;
+      const tracked = JSON.parse(jsonString).trackedBills;
+      console.log('THIS IS THE ID', id);
+      if (parsedResponse.status === 200) {
+        this.loginSuccess(id, tracked);
+      } else {
+        this.setState({
+          failedRegister: true
         });
-        if(!loginResponse.ok){
-            throw Error(loginResponse.statusText)
-        }
-        const parsedResponse = await loginResponse.json();
-        console.log('UNFILTERED RESPONSE FROM EXPRESS', loginResponse);
-        console.log('JSON RESPONSE FROM EXPRESS', parsedResponse);
-        const jsonString = parsedResponse.data;
-        const id = JSON.parse(jsonString).userId;
-        const tracked = JSON.parse(jsonString).trackedBills;
-        console.log('THIS IS THE ID', id);
-        if (parsedResponse.status === 200){
-          this.loginSuccess(id, tracked);
-        } else {
-          this.setState({
-            failedRegister: true
-          });
-        }
-    } catch(err){
-        console.log(err)
+      }
+    } catch (err) {
+      console.log(err)
     }
   }
   handleLogin = async (e) => {
     e.preventDefault();
     try {
-        const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND}users/login`, {
-            method: 'POST',
-            body: JSON.stringify({
-                username: this.state.username,
-                password: this.state.password,
-                email: this.state.email,
-                trackedBills: [],
-                trackedReps: []
-            }),
-            credentials: 'include',
-            headers: {
-            'Content-Type': 'application/json'
-            }
-        });
-        if(!loginResponse.ok){
-            throw Error(loginResponse.statusText)
+      const loginResponse = await fetch(`${process.env.REACT_APP_BACKEND}users/login`, {
+        method: 'POST',
+        body: JSON.stringify({
+          username: this.state.username,
+          password: this.state.password,
+          email: this.state.email,
+          trackedBills: [],
+          trackedReps: []
+        }),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
         }
-        const parsedResponse = await loginResponse.json();
-        console.log('JSON RESPONSE FROM EXPRESS', parsedResponse);
-        const id = parsedResponse.userId;
-        const tracked = parsedResponse.trackedBills;
-        console.log('THIS IS THE ID', id);
-        if (parsedResponse.status === 200){
-          this.loginSuccess(id, tracked);
-        } else {
-          this.setState({
-            failedLogin: true
-          })
-        }
-    } catch(err){
-        console.log(err)
+      });
+      if (!loginResponse.ok) {
+        throw Error(loginResponse.statusText)
+      }
+      const parsedResponse = await loginResponse.json();
+      console.log('JSON RESPONSE FROM EXPRESS', parsedResponse);
+      const id = parsedResponse.userId;
+      const tracked = parsedResponse.trackedBills;
+      console.log('THIS IS THE ID', id);
+      if (parsedResponse.status === 200) {
+        this.loginSuccess(id, tracked);
+      } else {
+        this.setState({
+          failedLogin: true
+        })
+      }
+    } catch (err) {
+      console.log(err)
     }
   }
 
@@ -419,7 +420,7 @@ class App extends Component {
     // ==========
     const state = this.state.userState.toLowerCase();
     let q = "";
-    if (this.state.query !== ""){
+    if (this.state.query !== "") {
       q = "&q=" + this.state.query
     }
     try {
@@ -430,7 +431,7 @@ class App extends Component {
           'X-RapidAPI-Key': civicFeedKey
         },
       });
-      if(!response.ok){
+      if (!response.ok) {
         throw Error(response.statusText);
       }
       const billsParsed = await response.json();
@@ -440,7 +441,7 @@ class App extends Component {
       // ==============================
       let uncleanArray = [...billsParsed];
       let cleanArray = [];
-      for(let i = 0; i < uncleanArray.length; i++) {
+      for (let i = 0; i < uncleanArray.length; i++) {
         let billObj = {
           title: uncleanArray[i].title,
           summary: uncleanArray[i].summary,
@@ -456,8 +457,8 @@ class App extends Component {
       this.setState({
         bills: cleanArray
       });
-      
-    } catch(err){
+
+    } catch (err) {
       console.log(err);
       return err
     }
@@ -466,59 +467,59 @@ class App extends Component {
   render() {
     return (
       <div id="container">
-        
+
         {/* NAVIGATION */}
-        <Navigation updateNav={this.updateNav}/> <br/>
+        <Navigation updateNav={this.updateNav} /> <br />
 
         {/* SEARCH BAR - DEFAULT 1ST BUTTON */}
         <Container>
-        <Row className="justify-content-center">
-          <Col xs={{size: 'auto'}}>
-            <SearchBar 
-              getBillsFromQuery={this.getBillsFromQuery} 
-              onRadioBtnClick={this.onRadioBtnClick} 
-              selected={this.state.queryBtn} 
-              handleInput={this.handleInput}
-              dropdownOpen={this.state.dropdownOpen}
-              toggle={this.toggle}
-              userState={this.state.userState}
-              changeState={this.changeState}
-            />
-          </Col>
-        </Row> <br/>
+          <Row className="justify-content-center">
+            <Col xs={{ size: 'auto' }}>
+              <SearchBar
+                getBillsFromQuery={this.getBillsFromQuery}
+                onRadioBtnClick={this.onRadioBtnClick}
+                selected={this.state.queryBtn}
+                handleInput={this.handleInput}
+                dropdownOpen={this.state.dropdownOpen}
+                toggle={this.toggle}
+                userState={this.state.userState}
+                changeState={this.changeState}
+              />
+            </Col>
+          </Row> <br />
 
-        {/* MAIN CONTENT */}
-        <main>
-          <Switch>
-            <Route exact path="/(|tracking)" render={(routeProps) => (
-              <TrackingContainer {...routeProps} 
-                logged={this.state.logged} 
-                trackedBills={this.state.trackedBills} 
-                trackedReps={this.state.trackedReps} 
-                untrackBill={this.untrackBill} 
-                handleLogin={this.handleLogin} 
-                handleChange={this.handleChange}
-                handleRegister={this.handleRegister}/>)}
-            />
+          {/* MAIN CONTENT */}
+          <main>
+            <Switch>
+              <Route exact path="/(|tracking)" render={(routeProps) => (
+                <TrackingContainer {...routeProps}
+                  logged={this.state.logged}
+                  trackedBills={this.state.trackedBills}
+                  trackedReps={this.state.trackedReps}
+                  untrackBill={this.untrackBill}
+                  handleLogin={this.handleLogin}
+                  handleChange={this.handleChange}
+                  handleRegister={this.handleRegister} />)}
+              />
 
-            <Route exact path="/bills" render={(routeProps) => 
-              (<BillContainer {...routeProps} 
-              untrackBill={this.untrackBill} 
-              trackedBills={this.state.trackedBills} 
-              bills={this.state.bills} 
-              addBillToTracking={this.addBillToTracking}
-              logged={this.state.logged}
-              />)}
-            />
+              <Route exact path="/bills" render={(routeProps) =>
+                (<BillContainer {...routeProps}
+                  untrackBill={this.untrackBill}
+                  trackedBills={this.state.trackedBills}
+                  bills={this.state.bills}
+                  addBillToTracking={this.addBillToTracking}
+                  logged={this.state.logged}
+                />)}
+              />
 
-            <Route exact path="/legislators" render={(routeProps) => 
-              (<RepContainer {...routeProps} 
-              info={this.state.reps} />)}
-            />
+              <Route exact path="/legislators" render={(routeProps) =>
+                (<RepContainer {...routeProps}
+                  info={this.state.reps} />)}
+              />
 
-            <Route component={ My404 }/>
-          </Switch>
-        </main>
+              <Route component={My404} />
+            </Switch>
+          </main>
         </Container>
 
       </div>
