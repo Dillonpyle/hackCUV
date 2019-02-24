@@ -79,6 +79,56 @@ h4 {
   font-size:30px;
 }
 
+.dropdown-menu {
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.badEntry {
+  color: red;
+  padding-top: 5px;
+  margin-bottom:-10px;
+}
+
+.headerBackground{
+  background: #233D86;
+}
+
+.appIcon {
+  width: 50px;
+  height: 50px;
+  margin-left:10px;
+  padding-left:10px;
+  vertical-align: -45%;
+}
+
+.brandName {
+  color: #fff;
+  font-size: 40px;
+  padding-top:30px;
+  padding-left:20px;
+}
+
+.navText{
+  color: #fff;
+}
+
+.navText:hover{
+  color: #fff;
+  border-bottom: 5px solid #fff;
+}
+
+.searchBar{
+  display: inline-block;
+}
+
+.bills{
+  padding: 3px;
+}
+
+.alignCenter {
+  text-align: center;
+}
 
 @media only screen and (max-width: 1199px) {
   .starIcon {
@@ -119,32 +169,20 @@ h4 {
     font-weight: 700;
     font-size: 20px;
   }
+  .appIcon {
+    width: 45px;
+    height: 40px;
+    margin-left:10px;
+    padding-left:10px;
+    vertical-align: -45%;
+  }
+  
+  .brandName {
+    color: #fff;
+    font-size: 30px;
+    vertical-align: sub;
+    padding-left:10px;
+  }
 }
 
-.dropdown-menu {
-  height: 300px;
-  overflow-y: scroll;
-}
 
-.badEntry {
-  color: red;
-  padding-top: 5px;
-  margin-bottom:-10px;
-}
-
-.appIcon {
-  width: 100px;
-  height: 100px;
-  margin-left:10px;
-  padding-left:10px;
-}
-
-.brandName {
-  font-size: 70px;
-  padding-top:30px;
-  padding-left:20px;
-}
-
-.alignCenter {
-  text-align: center;
-}
