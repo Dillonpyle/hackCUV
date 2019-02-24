@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 
-const billSchema = mongoose.Schema({
-    bill: {
-        type: String
-    }
+const BillSchema = new mongoose.Schema({
+  title: { type:String , required: true , unique: true },
+  summary: String,
+  state: {type:String, required: true},
+  bill_id: { type:String , required: true , unique: true },
+  proposed: Date,
+  lastAction: Date,
+  trackingCount: { type: Number, min: 0 }
 });
 
-const Bill = mongoose.model('Bill', billSchema);
-
-module.exports = Bill;
+module.exports = mongoose.model('Bill', BillSchema);
