@@ -161,7 +161,7 @@ class App extends Component {
   //                          ADD TO USER'S TRACKING LIST (MONGO AND REACT STATE)
   // ================================================================================================================
   addBillToTracking = async (billToTrack) => {
-    console.log(`THIS IS THE BILL WE'RE TRYING TO TRACK:${JSON.stringify(billToTrack)}`)
+    console.log(`BILL ID WE'RE TRYING TO TRACK:${JSON.stringify(billToTrack.bill_id)}`)
     try {
       // ================================================
       // CREATE IN MONGO IF DOESNT EXIST
@@ -205,51 +205,13 @@ class App extends Component {
       }
       const parsedIsUserTracking = await isUserTracking.json();
       console.log("RESPONSE TO TRYING TO TRACK BILL:" + JSON.stringify(parsedIsUserTracking));
-      // ==========================================
-      // UPDATE COUNT IN MONGO IF USER JUST TRACKED
-      // ==========================================
+      
       if (parsedIsUserTracking.status == 200) {
-        const cors_api_host = 'cors-anywhere.herokuapp.com';
-        const cors_api_url = 'https://' + cors_api_host + '/';
-        const getEmail = await fetch(`${cors_api_url}https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send`, {
-          method: 'POST',
-          body: JSON.stringify({
-            personalizations: [
-              {
-                to: [
-                  {
-                    email: this.state.email
-                  }
-                ],
-                subject: `Now tracked ${billToTrack.bill_id} ${parsedCreateBill.data.title}`
-              }
-            ],
-            from: {
-              email: "from_address@example.com"
-            },
-            content: [
-              {
-                type: "text/plain",
-                value: JSON.stringify(parsedCreateBill.data.summary)
-              }
-            ]
-          }),
-          //credentials: 'include',
-          headers: {
-            'X-RapidAPI-Key': civicFeedKey,
-            'Content-Type': 'application/json'
-          },
+        
 
-        });
-
-        if (!getEmail.ok) {
-          throw Error(getEmail.statusText)
-        }
-        if (getEmail.status == 200) {
-          // use getEmail.data for email in SendGrid
-          console.log('you sent an email')
-        }
-
+        // ================================================
+        // INCREMENT COUNT IN MONGO
+        // ================================================
         const updateBill = await fetch(`${port}bills/track/${billToTrack.bill_id}`, {
           method: 'PUT',
           body: JSON.stringify({
@@ -279,6 +241,50 @@ class App extends Component {
           trackedBills: [...this.state.trackedBills, parsedUpdateBill.data],
           bills: updatedArray
         });
+
+        // ==========================================
+        // SEND EMAIL AFTER EVERYTHING
+        // ==========================================
+        const cors_api_host = 'cors-anywhere.herokuapp.com';
+        const cors_api_url = 'https://' + cors_api_host + '/';
+        const getEmail = await fetch(`${cors_api_url}https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send`, {
+          method: 'POST',
+          body: JSON.stringify({
+            personalizations: [
+              {
+                to: [
+                  {
+                    email: this.state.email
+                  }
+                ],
+                subject: `Now tracked ${billToTrack.bill_id} ${billToTrack.title}`
+              }
+            ],
+            from: {
+              email: "from_address@example.com"
+            },
+            content: [
+              {
+                type: "text/plain",
+                value: JSON.stringify(billToTrack.summary)
+              }
+            ]
+          }),
+          //credentials: 'include',
+          headers: {
+            'X-RapidAPI-Key': civicFeedKey,
+            'Content-Type': 'application/json'
+          },
+
+        });
+        if (!getEmail.ok) {
+          throw Error(getEmail.statusText)
+        }
+        if (getEmail.status == 200) {
+          // use getEmail.data for email in SendGrid
+          console.log('you sent an email')
+        }
+
       } else {
         console.log(`ALREADY TRACKING BILL ${billToTrack.bill_id}`)
       }
@@ -309,7 +315,7 @@ class App extends Component {
         throw Error(updateBill.statusText)
       }
       const parsedUpdateBill = await updateBill.json();
-      console.log(`Updated bill response from Express API:${parsedUpdateBill}`)
+      console.log(`Updated bill response from Express API:${JSON.stringify(parsedUpdateBill.data)}`)
       // ==================================================================
       // REMOVE FROM USER'S TRACKED BILLS
       // ==================================================================
@@ -353,12 +359,8 @@ class App extends Component {
           trackedBills: arr,
           bills: updatedArray
         }, function () {
-          let billIds = [];
-          for (let i = 0; i < this.state.trackedBills; i++) {
-            billIds.push(this.state.trackedBills[i].bill_id)
-          }
-          console.log(`UNTRACKED BILL ${billId} TRACKED BILLS: ${billIds}.`);
-          //this.getTrendingBills();
+          // Update trending counts
+          this.getTrendingBills();
         });
       }
     } catch (err) {

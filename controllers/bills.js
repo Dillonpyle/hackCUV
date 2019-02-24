@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
       const findBill = await TrendingBills.findOne({'bill_id':req.body.bill_id});
       // IF IT DOESNT EXIST THEN CREATE IT
       if(!findBill) {
-        req.body.trackingCount = 1;
+        req.body.trackingCount = 0;
         const createdBill = await TrendingBills.create(req.body);
         res.json({
           status: 200,
@@ -62,7 +62,7 @@ router.get('/:id', async (req, res, next) => {
 router.put('/untrack/:id', async (req, res) => {
     try {
       console.log(`We sent this ID:${req.params.id}`)
-      const updatedBill = await TrendingBills.findByOneAndUpdate( {'bill_id':req.params.id} , {$inc : {'trackingCount' : req.body.increment}}/*, {new: true}*/);
+      const updatedBill = await TrendingBills.findOneAndUpdate( {'bill_id':req.params.id} , {$inc : {'trackingCount' : req.body.increment}}/*, {new: true}*/);
       res.json({
         status: 200,
         data: updatedBill
