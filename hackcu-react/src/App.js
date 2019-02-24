@@ -182,7 +182,7 @@ class App extends Component {
           // ================================================
           let updatedArray = [...this.state.bills];
           for(let i = 0; i < updatedArray.length; i++) {
-            if(updatedArray[i]._id == billToTrack._id) {
+            if(updatedArray[i].bill_id == billToTrack.bill_id) {
               updatedArray[i].trackingCount ++
             }
           }
@@ -239,7 +239,7 @@ class App extends Component {
         throw Error(userUntrackBill.statusText)
       }
       const parsedUntrackBill = await userUntrackBill.json();
-      console.log(`UNTRACKED BILL ${JSON.stringify(parsedUntrackBill.data._id)}`)
+      console.log(`UNTRACKED BILL ${JSON.stringify(parsedUntrackBill.data.bill_id)}`)
   // ==================================================================
   // REMOVE FROM TRACKEDBILLS IN REACT, IF SUCCESSFUL MONGO DELETION
   // ==================================================================
