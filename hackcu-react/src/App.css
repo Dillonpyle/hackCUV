@@ -1,0 +1,146 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.image {
+  width:80px;
+  height:80px;
+  float:left;
+}
+
+/* MEDIA QUERY BILL COUNT */
+.billCount {
+  width:50px;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.cardInfo {
+  width:200px;
+  display:inline-block;
+}
+
+.centerButton {
+  align-items:center;
+  justify-content:center;
+  text-align: center;
+}
+
+.trackingCount {
+  padding-left:8px;
+}
+
+.submit:hover {
+  color: black;
+  background-color:rgb(240, 240, 240);
+}
+
+.grayCard {
+  background-color: #F7F7F7;
+}
+
+.starIcon {
+  width: 70px;
+}
+
+h4 {
+  font-size:30px;
+}
+
+
+@media only screen and (max-width: 1199px) {
+  .starIcon {
+    margin-left: -5px;
+  }
+  .trackingCount{
+    padding-left: 12px;
+  }
+}
+
+@media only screen and (max-width: 1050px) {
+  .starIcon {
+    width: 70px;
+  }
+}
+
+@media only screen and (max-width: 991px) {
+  .cardContent {
+    padding-left: 20px;
+  }
+  .trackingCount{
+    padding-left: 17px;
+  }
+}
+
+@media only screen and (max-width: 767px) {
+  .cardContent {
+    padding-left: 20px;
+  }
+  .trackingCount{
+    padding-left: 28px;
+  }
+  .starIcon {
+    width: 70px;
+    margin-left:6px;
+  }
+  h4 {
+    font-weight: 700;
+    font-size: 20px;
+  }
+}
+
+.dropdown-menu {
+  height: 300px;
+  overflow-y: scroll;
+}
+
+.badEntry {
+  color: red;
+  padding-top: 5px;
+  margin-bottom:-10px;
+}
+
+.appIcon {
+  width: 100px;
+  height: 100px;
+  margin-left:10px;
+  padding-left:10px;
+}
+
+.brandName {
+  font-size: 70px;
+  padding-top:30px;
+  padding-left:20px;
+}
