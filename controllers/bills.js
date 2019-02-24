@@ -24,19 +24,27 @@ const TrendingBills = require('../models/bills');
 // CREATE ROUTE
 router.post('/', async (req, res) => {
     console.log(`We are creating a new bill in our database with: ${req.body}`)
-
     // Let's create a bill in our database (first follow)
     try {
+      // CHECK IF EXISTS ALREADY
+      const findBill = await TrendingBills.findOne({'bill_id':req.body.bill_id});
+      // IF IT DOESNT EXIST THEN CREATE IT
+      if(!findBill) {
         req.body.trackingCount = 1;
         const createdBill = await TrendingBills.create(req.body);
         res.json({
           status: 200,
           data: createdBill
         });
-        // console.log(`Server created this bill: ${createdBill.json()}`)
+      } else {
+        res.json({
+          status: 401,
+          data: "BILL ALREADY EXISTS"
+        });
+      }
     } catch(err){
-        console.log(err);
-        res.send(err);
+      console.log(err);
+      res.send(err);
     }
 });
 
@@ -57,7 +65,7 @@ router.get('/:id', async (req, res, next) => {
 router.put('/untrack/:id', async (req, res) => {
     try {
       console.log(`We sent this ID:${req.params.id}`)
-      const updatedBill = await TrendingBills.findByIdAndUpdate(req.params.id, {$inc : {'trackingCount' : req.body.increment}}/*, {new: true}*/);
+      const updatedBill = await TrendingBills.findByOneAndUpdate( {'bill_id':req.params.id} , {$inc : {'trackingCount' : req.body.increment}}/*, {new: true}*/);
       res.json({
         status: 200,
         data: updatedBill
@@ -72,7 +80,7 @@ router.put('/untrack/:id', async (req, res) => {
 router.put('/track/:id', async (req, res) => {
   try {
     console.log(`We sent this ID:${req.params.id}`)
-    const updatedBill = await TrendingBills.findByIdAndUpdate(req.params.id, {$inc : {'trackingCount' : req.body.increment}}/*, {new: true}*/);
+    const updatedBill = await TrendingBills.findOneAndUpdate( {'bill_id':req.params.id} , {$inc : {'trackingCount' : req.body.increment}}/*, {new: true}*/);
     res.json({
       status: 200,
       data: updatedBill

@@ -193,10 +193,10 @@ router.put('/:userid/untrack/:id', async (req, res) => {
     try {
       const updatedUser = await User.findOneAndUpdate(
         { _id: req.params.userid,
-          "trackedBills._id" : req.params.id }, 
+          "trackedBills.bill_id" : req.params.id }, 
         { $pull:  { 
           "trackedBills": {
-            _id: req.params.id} 
+            bill_id: req.params.id} 
         }},
       { upsert:false,
         new:true

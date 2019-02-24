@@ -8,10 +8,10 @@ const TrackingContainer = (props) => {
 // =======================================================
     const trackedBills = props.trackedBills.map ((bill,i) => {
         return (
-            <Card body key={bill._id}>
+            <Card body key={bill.bill_id}>
                 <CardTitle><h4>{bill.title}</h4></CardTitle>
                 <CardText>{bill.summary}</CardText>
-                <Button onClick={props.untrackBill.bind(this,bill._id)}>UnTrack</Button>
+                <Button onClick={props.untrackBill.bind(this,bill.bill_id)}>UnTrack</Button>
             </Card>
         )
     })

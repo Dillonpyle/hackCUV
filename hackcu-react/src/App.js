@@ -6,8 +6,7 @@ import BillContainer from './Pages/BillContainer/BillContainer';
 import RepContainer from './Pages/RepContainer/RepContainer';                
 import SearchBar from './SearchBar/SearchBar';                            
 import { Route, Switch } from 'react-router-dom';                         
-import { Container, Row, Col } from 'reactstrap';                                                                                      
-const openSecretsKey = "54ad80261e9035d45d3b409dff93daec";                  
+import { Container, Row, Col } from 'reactstrap';                                                                                                      
 const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";              
 const port = process.env.REACT_APP_BACKEND                                
 
@@ -46,10 +45,10 @@ class App extends Component {
   // ================================================================================================================
   //                                            TOGGLE DROPDOWN
   // ================================================================================================================
-  toggle(){
+  toggle = () => {
     this.setState({
       dropdownOpen: !this.state.dropdownOpen
-    })
+    });
   }
 
   // ================================================================================================================
@@ -116,7 +115,32 @@ class App extends Component {
   //                          ADD TO USER'S TRACKING LIST (MONGO AND REACT STATE)
   // ================================================================================================================
   addBillToTracking = async (billToTrack) => {
+    console.log(`THIS IS THE BILL WE'RE TRYING TO TRACK:${JSON.stringify(billToTrack)}`)
     try {
+        // ================================================
+        // CREATE IN MONGO IF DOESNT EXIST
+        // ================================================
+        const createBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/`, {
+          method: 'POST',
+          body: JSON.stringify({
+            title: billToTrack.title,   
+            state: billToTrack.state,
+            bill_id: billToTrack.bill_id,   
+            summary: billToTrack.summary,
+            proposed: billToTrack.created_at,
+            lastAction: billToTrack.updated_at,
+          }),
+          credentials: 'include',
+          headers: {
+          'Content-Type': 'application/json'
+          }
+          });
+          if(!createBill.ok){
+              throw Error(createBill.statusText)
+          }
+          const parsedCreateBill = await createBill.json();
+          console.log(`TRIED TO CREATE BILL, NODE SENT:${JSON.stringify(parsedCreateBill)}`)
+
         // ================================================
         // MONGO: ADD TO USER'S TRACKED BILLS (IF POSSIBLE)
         // ================================================
@@ -133,6 +157,7 @@ class App extends Component {
           throw Error(isUserTracking.statusText)
         }
         const parsedIsUserTracking = await isUserTracking.json();
+        console.log("RESPONSE TO TRYING TO TRACK BILL:" + JSON.stringify(parsedIsUserTracking));
         // ==========================================
         // UPDATE COUNT IN MONGO IF USER JUST TRACKED
         // ==========================================
@@ -166,7 +191,7 @@ class App extends Component {
             trackedBills: [...this.state.trackedBills, parsedUpdateBill.data],
             bills: updatedArray
           }, function() {
-            console.log(`TRACKING BILL ${this.state.trackedBills[this.state.trackedBills.length-1].bill_id}`);
+            //console.log(`TRACKING BILL ${this.state.trackedBills[this.state.trackedBills.length-1].bill_id}`);
             //this.getTrendingBills();
           });
         } else {
@@ -203,7 +228,7 @@ class App extends Component {
   // ==================================================================
   // REMOVE FROM USER'S TRACKED BILLS
   // ==================================================================
-      const userUntrackBill = await fetch(`${process.env.REACT_APP_BACKEND}auth/${this.state._id}/untrack/${billId}`, {
+      const userUntrackBill = await fetch(`${process.env.REACT_APP_BACKEND}users/${this.state._id}/untrack/${billId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -221,20 +246,20 @@ class App extends Component {
       if (parsedUntrackBill.status == 200) {
         let billIds = [];
         for (let i=0; i<this.state.trackedBills; i++){
-          billIds.push(this.state.trackedBills[i]._id)
+          billIds.push(this.state.trackedBills[i].bill_id)
         }
         console.log(`TRACKED BILLS: ${JSON.stringify(billIds)}`)
 
         let arr = [];
         this.state.trackedBills.forEach((bill) => {
-          if (bill._id !== billId){
+          if (bill.bill_id !== billId){
             arr.push(bill);
           }
         })
 
         let updatedArray = [...this.state.bills];
         for(let i = 0; i < updatedArray.length; i++) {
-          if(updatedArray[i]._id == billId && updatedArray[i].trackingCount) {
+          if(updatedArray[i].bill_id == billId && updatedArray[i].trackingCount) {
             updatedArray[i].trackingCount --
           }
         }
@@ -245,7 +270,7 @@ class App extends Component {
         }, function() {
           let billIds = [];
           for (let i=0; i<this.state.trackedBills; i++){
-            billIds.push(this.state.trackedBills[i]._id)
+            billIds.push(this.state.trackedBills[i].bill_id)
           }
           console.log(`UNTRACKED BILL ${billId} TRACKED BILLS: ${billIds}.`);
           //this.getTrendingBills();
@@ -372,8 +397,23 @@ class App extends Component {
       // ==============================
       // NOW UPDATE THE STATE WITH DATA
       // ==============================
+      let uncleanArray = [...billsParsed];
+      let cleanArray = [];
+      for(let i = 0; i < uncleanArray.length; i++) {
+        let billObj = {
+          title: uncleanArray[i].title,
+          summary: uncleanArray[i].summary,
+          state: uncleanArray[i].state,
+          bill_id: uncleanArray[i].bill_id,
+          proposed: uncleanArray[i].created_at,
+          lastAction: uncleanArray[i].updated_at,
+          trackingCount: 0
+        };
+        cleanArray.push(billObj)
+      }
+
       this.setState({
-        bills: billsParsed
+        bills: cleanArray
       });
       
     } catch(err){

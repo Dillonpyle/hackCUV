@@ -7,7 +7,7 @@ const BillList = (props) => {
         let isTracked = false;
         let imgSrc = "/images/unclicked.gif";
         for (let i=0; i<props.trackedBills.length; i++){
-            if (props.trackedBills[i]._id == bill._id) {
+            if (props.trackedBills[i].bill_id == bill.bill_id) {
                 isTracked = true;
                 imgSrc = "/images/clicked.gif";
             }

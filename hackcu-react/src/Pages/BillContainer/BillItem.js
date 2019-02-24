@@ -47,7 +47,7 @@ export class BillItem extends Component {
                                 <img onClick={
                                     !this.state.trackedStatus ? 
                                     this.addBillToTracking.bind(this,this.props.billInfo) :
-                                    this.untrackBill.bind(this,this.props.billInfo._id)
+                                    this.untrackBill.bind(this,this.props.billInfo.bill_id)
                                 } 
                                 className="starIcon" src={this.state.imgSrc}/> 
                             </figure>
