@@ -7,7 +7,8 @@ import RepContainer from './Pages/RepContainer/RepContainer';
 import SearchBar from './SearchBar/SearchBar';                            
 import { Route, Switch } from 'react-router-dom';                         
 import { Container, Row, Col } from 'reactstrap';                                                                                                      
-const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";              
+const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";
+// const sendGridKey = "c91d0fa0a6msh1417965add04d7cp1caaa2jsn509bcdccbd47";              
 const port = process.env.REACT_APP_BACKEND                                
 
 // =================================
@@ -117,86 +118,124 @@ class App extends Component {
   addBillToTracking = async (billToTrack) => {
     console.log(`THIS IS THE BILL WE'RE TRYING TO TRACK:${JSON.stringify(billToTrack)}`)
     try {
-        // ================================================
-        // CREATE IN MONGO IF DOESNT EXIST
-        // ================================================
-        const createBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/`, {
-          method: 'POST',
-          body: JSON.stringify({
-            title: billToTrack.title,   
-            state: billToTrack.state,
-            bill_id: billToTrack.bill_id,   
-            summary: billToTrack.summary,
-            proposed: billToTrack.created_at,
-            lastAction: billToTrack.updated_at,
-          }),
-          credentials: 'include',
-          headers: {
-          'Content-Type': 'application/json'
-          }
-          });
-          if(!createBill.ok){
-              throw Error(createBill.statusText)
-          }
-          const parsedCreateBill = await createBill.json();
-          console.log(`TRIED TO CREATE BILL, NODE SENT:${JSON.stringify(parsedCreateBill)}`)
-
-        // ================================================
-        // MONGO: ADD TO USER'S TRACKED BILLS (IF POSSIBLE)
-        // ================================================
-        const isUserTracking = await fetch(`${process.env.REACT_APP_BACKEND}users/${this.state._id}/track/${billToTrack.bill_id}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            bill: billToTrack,
-          }),
-          credentials: 'include',
-          headers: {
-          'Content-Type': 'application/json'
-        }});
-        if(!isUserTracking.ok){
-          throw Error(isUserTracking.statusText)
+      // ================================================
+      // CREATE IN MONGO IF DOESNT EXIST
+      // ================================================
+      const createBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/`, {
+        method: 'POST',
+        body: JSON.stringify({
+          title: billToTrack.title,   
+          state: billToTrack.state,
+          bill_id: billToTrack.bill_id,   
+          summary: billToTrack.summary,
+          proposed: billToTrack.created_at,
+          lastAction: billToTrack.updated_at,
+        }),
+        credentials: 'include',
+        headers: {
+        'Content-Type': 'application/json'
         }
-        const parsedIsUserTracking = await isUserTracking.json();
-        console.log("RESPONSE TO TRYING TO TRACK BILL:" + JSON.stringify(parsedIsUserTracking));
-        // ==========================================
-        // UPDATE COUNT IN MONGO IF USER JUST TRACKED
-        // ==========================================
-        if (parsedIsUserTracking.status == 200) {
-          const updateBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/track/${billToTrack.bill_id}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            increment: 1,
-          }),
-          credentials: 'include',
-          headers: {
-          'Content-Type': 'application/json'
-          }
-          });
-          if(!updateBill.ok){
-              throw Error(updateBill.statusText)
-          }
-          const parsedUpdateBill = await updateBill.json();
-          console.log(`INCREMENTED BILL ID ${JSON.stringify(parsedUpdateBill.data.bill_id)}`)
-          // ================================================
-          // ADD TO TRACKEDBILLS IN REACT (BASED ON DB REPLY)
-          // ================================================
-          let updatedArray = [...this.state.bills];
-          for(let i = 0; i < updatedArray.length; i++) {
-            if(updatedArray[i].bill_id == billToTrack.bill_id) {
-              updatedArray[i].trackingCount ++
+        });
+        if(!createBill.ok){
+            throw Error(createBill.statusText)
+        }
+        const parsedCreateBill = await createBill.json();
+        console.log(`TRIED TO CREATE BILL, NODE SENT:${JSON.stringify(parsedCreateBill)}`)
+
+      // ================================================
+      // MONGO: ADD TO USER'S TRACKED BILLS (IF POSSIBLE)
+      // ================================================
+      const isUserTracking = await fetch(`${process.env.REACT_APP_BACKEND}users/${this.state._id}/track/${billToTrack.bill_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          bill: billToTrack,
+        }),
+        credentials: 'include',
+        headers: {
+        'Content-Type': 'application/json'
+      }});
+      if(!isUserTracking.ok){
+        throw Error(isUserTracking.statusText)
+      }
+      const parsedIsUserTracking = await isUserTracking.json();
+      console.log("RESPONSE TO TRYING TO TRACK BILL:" + JSON.stringify(parsedIsUserTracking));
+      // ==========================================
+      // UPDATE COUNT IN MONGO IF USER JUST TRACKED
+      // ==========================================
+      if (parsedIsUserTracking.status == 200) {
+        const cors_api_host = 'cors-anywhere.herokuapp.com';
+        const cors_api_url = 'https://' + cors_api_host + '/';
+        const getEmail = await fetch(`${cors_api_url}https://rapidprod-sendgrid-v1.p.rapidapi.com/mail/send`, {
+        method: 'POST',
+        body: JSON.stringify({
+          personalizations: [
+            {
+              to: [
+                {
+                  email: "dillonpyle1991@gmail.com"
+                }
+              ],
+              subject: "New Tracked Bill"
             }
-          }
+          ],
+          from: {
+            email: "from_address@example.com"
+          },
+          content: [
+            {
+              type: "text/plain",
+              value: `you tracked a bill`
+            }
+          ]
+        }),
+        //credentials: 'include',
+        headers: {
+          'X-RapidAPI-Key': civicFeedKey,
+          'Content-Type': 'application/json'
+        },
+        
+        });
 
-          this.setState({ 
-            trackedBills: [...this.state.trackedBills, parsedUpdateBill.data],
-            bills: updatedArray
-          }, function() {
-            //console.log(`TRACKING BILL ${this.state.trackedBills[this.state.trackedBills.length-1].bill_id}`);
-            //this.getTrendingBills();
-          });
-        } else {
-          console.log(`ALREADY TRACKING BILL ${billToTrack.bill_id}`)
+        if (!getEmail.ok) {
+          throw Error(getEmail.statusText)
         }
+        if (getEmail.status == 200) {
+          // use getEmail.data for email in SendGrid
+          console.log('you sent an email')
+        }
+
+        const updateBill = await fetch(`${process.env.REACT_APP_BACKEND}bills/track/${billToTrack.bill_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          increment: 1,
+        }),
+        credentials: 'include',
+        headers: {
+        'Content-Type': 'application/json'
+        }
+        });
+        if(!updateBill.ok){
+            throw Error(updateBill.statusText)
+        }
+        const parsedUpdateBill = await updateBill.json();
+        console.log(`INCREMENTED BILL ID ${JSON.stringify(parsedUpdateBill.data.bill_id)}`)
+        // ================================================
+        // ADD TO TRACKEDBILLS IN REACT (BASED ON DB REPLY)
+        // ================================================
+        let updatedArray = [...this.state.bills];
+        for(let i = 0; i < updatedArray.length; i++) {
+          if(updatedArray[i].bill_id == billToTrack.bill_id) {
+            updatedArray[i].trackingCount ++
+          }
+        }
+
+        this.setState({ 
+          trackedBills: [...this.state.trackedBills, parsedUpdateBill.data],
+          bills: updatedArray
+        });
+      } else {
+        console.log(`ALREADY TRACKING BILL ${billToTrack.bill_id}`)
+      }
     } catch(err){
       console.log(err)
     }
@@ -292,6 +331,7 @@ class App extends Component {
             body: JSON.stringify({
                 username: this.state.username,
                 password: this.state.password,
+                email: this.state.email,
                 trackedBills: [],
                 trackedReps: []
             }),
@@ -329,6 +369,7 @@ class App extends Component {
             body: JSON.stringify({
                 username: this.state.username,
                 password: this.state.password,
+                email: this.state.email,
                 trackedBills: [],
                 trackedReps: []
             }),

@@ -37,6 +37,7 @@ router.post('/login', async (req, res) => {
     const userDbEntry = {};
     userDbEntry.username = req.body.username;
     userDbEntry.password = hashedPassword;
+    userDbEntry.email = req.body.email;
     // First we handle a login, if not valid, we just register user
     try {
         const foundUser = await User.findOne({
