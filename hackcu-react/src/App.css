@@ -92,6 +92,7 @@ h4 {
 
 .headerBackground{
   background: #233D86;
+  height: 14.5vh;
 }
 
 .appIcon {
@@ -129,6 +130,9 @@ h4 {
 .alignCenter {
   text-align: center;
 }
+.dropdown-toggle::after {
+  display:none;
+}
 
 @media only screen and (max-width: 1199px) {
   .starIcon {
@@ -137,11 +141,19 @@ h4 {
   .trackingCount{
     padding-left: 12px;
   }
+  .headerBackground{
+    background: #233D86;
+    height: 14.5vh;
+  }
 }
 
 @media only screen and (max-width: 1050px) {
   .starIcon {
     width: 70px;
+  }
+  .headerBackground{
+    background: #233D86;
+    height: 14.5vh;
   }
 }
 
@@ -151,6 +163,10 @@ h4 {
   }
   .trackingCount{
     padding-left: 17px;
+  }
+  .headerBackground{
+    background: #233D86;
+    height: 14.5vh;
   }
 }
 
@@ -182,6 +198,10 @@ h4 {
     font-size: 30px;
     vertical-align: sub;
     padding-left:10px;
+  }
+  .headerBackground{
+    background: #233D86;
+    height: 12.5vh;
   }
 }
 

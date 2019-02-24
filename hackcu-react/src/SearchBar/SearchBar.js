@@ -70,7 +70,6 @@ const SearchBar = (props) => {
                         </DropdownMenu>
                     </ButtonDropdown>
 
-                    <Button color="primary" onClick={props.onRadioBtnClick.bind(this, 3)} active={props.selected === 1}>US</Button>
                 </ButtonGroup>
             </Col>
 
@@ -79,8 +78,9 @@ const SearchBar = (props) => {
                 <Form className='searchBar' onSubmit={props.getBillsFromQuery.bind(this)}>
                     <InputGroup>
                         <Input placeholder="Search Bills" onChange={props.handleInput.bind(this)} />
+                        <Input type="Submit" value="Search" />
                     </InputGroup>
-                    <Input type="Submit" value="Search" />
+
                 </Form>
             </Col>
         </Row>
