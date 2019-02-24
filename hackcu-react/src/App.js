@@ -8,7 +8,7 @@ import RepContainer from './Pages/RepContainer/RepContainer';
 import SearchBar from './SearchBar/SearchBar';
 import { Route, Switch } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
-const civicFeedKey = "1bb55445d6mshd047e0a2e423461p1a0366jsn4e4bc674f13f";           
+const civicFeedKey = "c91d0fa0a6msh1417965add04d7cp1caaa2jsn509bcdccbd47";           
 const port = process.env.REACT_APP_BACKEND
 
 // =================================
