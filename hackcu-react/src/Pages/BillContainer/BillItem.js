@@ -56,10 +56,16 @@ export class BillItem extends Component {
                     <Col xs="10" md="11">
                         <div className="cardContent">
                             <CardTitle>
-                                <h4> {this.props.billInfo.title} </h4>
+                                <h4> 
+                                    {this.props.billInfo.title.length > 100 ? 
+                                    ( this.props.billInfo.title.slice(0,1).toUpperCase() + this.props.billInfo.title.slice(1,100).toLowerCase() + "...") : 
+                                    this.props.billInfo.title.slice(0,1).toUpperCase() + this.props.billInfo.title.slice(1,this.props.billInfo.title.length).toLowerCase() } 
+                                </h4>
                             </CardTitle>
                             <CardText className="cardText">
-                                {this.props.billInfo.summary}
+                                {this.props.billInfo.summary.length > 200 ? 
+                                this.props.billInfo.summary.slice(0,200) + "..." : 
+                                this.props.billInfo.summary }
                             </CardText>
                         </div>
                     </Col>

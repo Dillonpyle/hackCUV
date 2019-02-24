@@ -32,7 +32,7 @@ class App extends Component {
       failedLogin: false,
       failedRegister: false,
       _id: null,
-      userState: "co",
+      userState: "CO",
       activePage: 'tracking',
       query: '',
       queryBtn: 0,
@@ -417,7 +417,7 @@ class App extends Component {
     // ========================
     // API PARAMS
     // ==========
-    const state = this.state.userState;
+    const state = this.state.userState.toLowerCase();
     let q = "";
     if (this.state.query !== ""){
       q = "&q=" + this.state.query
